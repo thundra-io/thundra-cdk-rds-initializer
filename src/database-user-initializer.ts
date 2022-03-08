@@ -1,7 +1,5 @@
-import * as ec2 from '@aws-cdk/aws-ec2';
 import * as iam from "@aws-cdk/aws-iam";
 import * as lambda from "@aws-cdk/aws-lambda";
-import * as lambdaNode from "@aws-cdk/aws-lambda-nodejs";
 import * as cdk from "@aws-cdk/core";
 import * as path from "path";
 import { DatabaseInitializerProps, DatabaseUserGrant } from "./database-initializer-props";
@@ -44,22 +42,13 @@ export class DatabaseUserInitializer extends cdk.Resource {
     this.databaseAdminUserSecretName = props.databaseAdminUserSecretName;
     this.databaseUsers = props.databaseUsers;
 
-    const databaseUserInitializer = new lambdaNode.NodejsFunction(this, `${this.prefix}-database-user-initializer`, {
+    const databaseUserInitializer = new lambda.Function(this, `${this.prefix}-database-user-initializer`, {
       functionName: `${this.prefix}-database-user-initializer`,
-      entry: path.join(__dirname, "..", "lambdas", 'src', 'index.ts'),
-      handler: "databaseUserInitializerHandler",
+      code: lambda.Code.fromAsset(path.join(__dirname, "..", "lambdas", 'dist')),
+      handler: "index.databaseUserInitializerHandler",
       runtime: lambda.Runtime.NODEJS_14_X,
       memorySize: 512,
-      timeout: cdk.Duration.minutes(15),
-      bundling: {
-        nodeModules: ['mysql', 'uuid'],
-        minify: false, // minify code, defaults to false
-        sourceMap: true, // include source map, defaults to false
-        sourceMapMode: lambdaNode.SourceMapMode.EXTERNAL, // defaults to SourceMapMode.DEFAULT
-        sourcesContent: false, // do not include original source into source map, defaults to true
-        target: 'es2020', // target environment for the generated JavaScript code
-      },
-      allowPublicSubnet: true,
+      timeout: cdk.Duration.minutes(1),
       vpc: props.vpc,
       vpcSubnets: props.vpcSubnets,
       securityGroups: props.securityGroups
