@@ -1,4 +1,6 @@
 import * as ec2 from '@aws-cdk/aws-ec2'
+import * as secretsmanager from '@aws-cdk/aws-secretsmanager'
+
 
 export interface DatabaseInitializerProps {
   /**
@@ -8,7 +10,7 @@ export interface DatabaseInitializerProps {
   /**
    * 
    */
-  readonly databaseAdminUserSecretName: string;
+  readonly databaseAdminUserSecret: secretsmanager.ISecret;
 
   readonly vpc?: ec2.IVpc;
 

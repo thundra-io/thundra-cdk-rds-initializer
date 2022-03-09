@@ -1,6 +1,7 @@
+import * as cdk from "@aws-cdk/core";
 import * as iam from "@aws-cdk/aws-iam";
 import * as lambda from "@aws-cdk/aws-lambda";
-import * as cdk from "@aws-cdk/core";
+import * as secretsmanager from '@aws-cdk/aws-secretsmanager'
 import * as path from "path";
 import { DatabaseInitializerProps, DatabaseUserGrant } from "./database-initializer-props";
 
@@ -14,7 +15,7 @@ export interface DatabaseUserInitializerProps extends DatabaseInitializerProps {
   readonly databaseUsers: {
     username: string,
     grants: DatabaseUserGrant[]
-    secretName: string;
+    secret: secretsmanager.ISecret;
     /**
     * 
     * @default false
@@ -28,18 +29,18 @@ export interface DatabaseUserInitializerProps extends DatabaseInitializerProps {
  */
 export class DatabaseUserInitializer extends cdk.Resource {
   private readonly prefix: string;
-  private readonly databaseAdminUserSecretName: string;
+  private readonly databaseAdminUserSecret: secretsmanager.ISecret;
   private readonly databaseUsers: {
     username: string;
     grants: DatabaseUserGrant[];
-    secretName: string;
+    secret: secretsmanager.ISecret;
     isIAMUser?: boolean;
   }[]
 
   public constructor(scope: cdk.Construct, id: string, props: DatabaseUserInitializerProps) {
     super(scope, id);
     this.prefix = props.prefix
-    this.databaseAdminUserSecretName = props.databaseAdminUserSecretName;
+    this.databaseAdminUserSecret = props.databaseAdminUserSecret;
     this.databaseUsers = props.databaseUsers;
 
     const databaseUserInitializer = new lambda.Function(this, `${this.prefix}-database-user-initializer`, {
@@ -54,8 +55,8 @@ export class DatabaseUserInitializer extends cdk.Resource {
       securityGroups: props.securityGroups
     });
 
-    const resources: string[] = [`arn:${cdk.Stack.of(this).partition}:secretsmanager:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:secret:${this.databaseAdminUserSecretName}-*`];
-    this.databaseUsers.forEach(user => resources.push(`arn:${cdk.Stack.of(this).partition}:secretsmanager:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:secret:${user.secretName}-*`));
+    const resources: string[] = [this.databaseAdminUserSecret.secretArn];
+    this.databaseUsers.forEach(user => resources.push(user.secret.secretArn));
 
     databaseUserInitializer.addToRolePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
@@ -70,11 +71,11 @@ export class DatabaseUserInitializer extends cdk.Resource {
       serviceToken: databaseUserInitializer.functionArn,
       properties: {
         Region: cdk.Stack.of(this).region,
-        DatabaseAdminUserSecretName: this.databaseAdminUserSecretName,
+        DatabaseAdminUserSecretName: this.databaseAdminUserSecret.secretName,
         DatabaseUsers: this.databaseUsers.map(user => ({
           username: user.username,
           grants: user.grants,
-          secretName: user.secretName,
+          secretName: user.secret.secretName,
           isIAMUser: user.isIAMUser
         }))
       },

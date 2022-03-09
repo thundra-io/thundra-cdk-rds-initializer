@@ -1,6 +1,7 @@
+import * as cdk from "@aws-cdk/core";
 import * as iam from "@aws-cdk/aws-iam";
 import * as lambda from "@aws-cdk/aws-lambda";
-import * as cdk from "@aws-cdk/core";
+import * as secretsmanager from '@aws-cdk/aws-secretsmanager'
 import * as path from "path";
 import { DatabaseInitializerProps } from "./database-initializer-props";
 
@@ -19,13 +20,13 @@ export interface DatabaseScriptRunnerProps extends DatabaseInitializerProps {
  */
 export class DatabaseScriptRunner extends cdk.Resource {
   private readonly prefix: string;
-  private readonly databaseAdminUserSecretName: string;
+  private readonly databaseAdminUserSecret: secretsmanager.ISecret;
   private readonly script: string;
 
   public constructor(scope: cdk.Construct, id: string, props: DatabaseScriptRunnerProps) {
     super(scope, id);
     this.prefix = props.prefix;
-    this.databaseAdminUserSecretName = props.databaseAdminUserSecretName;
+    this.databaseAdminUserSecret = props.databaseAdminUserSecret;
     this.script = props.script;
 
     const databaseScriptRunner = new lambda.Function(this, `${this.prefix}-database-script-runner`, {
@@ -46,7 +47,7 @@ export class DatabaseScriptRunner extends cdk.Resource {
         "secretsmanager:DescribeSecret",
       ],
       resources: [
-        `arn:${cdk.Stack.of(this).partition}:secretsmanager:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:secret:${this.databaseAdminUserSecretName}-*`
+        this.databaseAdminUserSecret.secretArn
       ],
     }));
 
@@ -54,7 +55,7 @@ export class DatabaseScriptRunner extends cdk.Resource {
       serviceToken: databaseScriptRunner.functionArn,
       properties: {
         Region: cdk.Stack.of(this).region,
-        DatabaseAdminUserSecretName: this.databaseAdminUserSecretName,
+        DatabaseAdminUserSecretName: this.databaseAdminUserSecret.secretName,
         Script: this.script
       },
     });
