@@ -30,7 +30,7 @@ export class DatabaseScriptRunner extends cdk.Resource {
 
     const databaseScriptRunner = new lambda.Function(this, `${this.prefix}-database-script-runner`, {
       functionName: `${this.prefix}-database-script-runner`,
-      code: lambda.Code.fromAsset(path.join(__dirname, "..", "lambdas", 'dist')),
+      code: lambda.Code.fromAsset(path.join(__dirname, "lambda")),
       handler: "index.databaseScriptRunnerHandler",
       runtime: lambda.Runtime.NODEJS_14_X,
       memorySize: 512,

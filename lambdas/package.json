@@ -1,19 +1,12 @@
 {
   "name": "thundra-cdk-rds-initializer-handler",
-  "version": "0.1.0",
   "description": "Lambda handler for running custom database script",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist/"
-  ],
   "scripts": {
+    "clean": "rimraf dist coverage tsconfig.tsbuildinfo",
     "pretest": "npm run build:tsc",
     "test": "jest",
-    "lint": "eslint src --ext .ts",
-    "clean": "rimraf dist coverage tsconfig.tsbuildinfo",
     "prebuild": "npm run clean",
-    "build": "esbuild src/index.ts --bundle --target=node14 --platform=node --outfile=dist/index.js",
+    "build": "esbuild src/index.ts --bundle --target=node14 --platform=node --outfile=../dist/lambda/index.js",
     "build:tsc": "tsc"
   },
   "dependencies": {
@@ -28,31 +21,7 @@
     "@types/jest": "27.4.0",
     "@types/node": "^16.11.6",
     "esbuild": "^0.14.10",
-    "eslint": "^7.29.0",
     "jest": "27.5.1",
     "typescript": "4.5.5"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/thundra-io/thundra-cdk-rds-initializer.git"
-  },
-  "keywords": [
-    "aws",
-    "aws-cdk",
-    "aws-cdk-construct",
-    "aws-rds",
-    "rds"
-  ],
-  "author": "Tolga Takır <tolga@thundra.io>",
-  "license": "Apache-2.0",
-  "licenses": [
-    {
-      "type": "Apache-2.0",
-      "url": "http://www.apache.org/licenses/LICENSE-2.0"
-    }
-  ],
-  "bugs": {
-    "url": "https://github.com/thundra-io/thundra-cdk-rds-initializer/issues"
-  },
-  "homepage": "https://github.com/thundra-io/thundra-cdk-rds-initializer#readme"
+  }
 }

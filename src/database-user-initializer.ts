@@ -44,7 +44,7 @@ export class DatabaseUserInitializer extends cdk.Resource {
 
     const databaseUserInitializer = new lambda.Function(this, `${this.prefix}-database-user-initializer`, {
       functionName: `${this.prefix}-database-user-initializer`,
-      code: lambda.Code.fromAsset(path.join(__dirname, "..", "lambdas", 'dist')),
+      code: lambda.Code.fromAsset(path.join(__dirname, "lambda")),
       handler: "index.databaseUserInitializerHandler",
       runtime: lambda.Runtime.NODEJS_14_X,
       memorySize: 512,
@@ -54,7 +54,7 @@ export class DatabaseUserInitializer extends cdk.Resource {
       securityGroups: props.securityGroups
     });
 
-    let resources: string[] = [`arn:${cdk.Stack.of(this).partition}:secretsmanager:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:secret:${this.databaseAdminUserSecretName}-*`];
+    const resources: string[] = [`arn:${cdk.Stack.of(this).partition}:secretsmanager:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:secret:${this.databaseAdminUserSecretName}-*`];
     this.databaseUsers.forEach(user => resources.push(`arn:${cdk.Stack.of(this).partition}:secretsmanager:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:secret:${user.secretName}-*`));
 
     databaseUserInitializer.addToRolePolicy(new iam.PolicyStatement({

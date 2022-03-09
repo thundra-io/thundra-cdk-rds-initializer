@@ -1,6 +1,0 @@
-{
-    "extends": ["@prescott/tslint-preset"],
-    "rules": {
-        "quotemark": [true, "double"]
-    }
-}
