@@ -1,11 +1,8 @@
 import {
   CloudFormationCustomResourceEvent,
   CloudFormationCustomResourceEventCommon,
-  CloudFormationCustomResourceFailedResponse,
-  CloudFormationCustomResourceResponse,
-  CloudFormationCustomResourceSuccessResponse,
+  CloudFormationCustomResourceResponse
 } from "aws-lambda";
-import * as https from "https";
 
 type ConsumeEventResult = {
   physicalResourceId: CloudFormationCustomResourceResponse["PhysicalResourceId"];
@@ -20,78 +17,20 @@ export abstract class CustomResourceHandler<T extends EventBase = CloudFormation
   public async handleEvent() {
     try {
       const { physicalResourceId, data } = await this.consumeEvent();
-
-      if (data?.status === 'ERROR') {
-        console.error("Failed to provision resource!", data.message); // tslint:disable-line
-        const response: CloudFormationCustomResourceFailedResponse = {
-          Status: "FAILED",
-          Reason: data.message,
-          PhysicalResourceId: physicalResourceId,
-          StackId: this.event.StackId,
-          RequestId: this.event.RequestId,
-          LogicalResourceId: this.event.LogicalResourceId,
-          Data: data,
-        };
-        await this.notify(response);
-        return response;
-      } else {
-        console.log(`Provision completed successfuly...`); // tslint:disable-line
-        const response: CloudFormationCustomResourceSuccessResponse = {
-          Status: "SUCCESS",
-          PhysicalResourceId: physicalResourceId,
-          StackId: this.event.StackId,
-          RequestId: this.event.RequestId,
-          LogicalResourceId: this.event.LogicalResourceId,
-          Data: data,
-        };
-        await this.notify(response);
-        return response;
-      }
-    } catch (e) {
-      console.error("Failed to provision resource!", e.stack); // tslint:disable-line
-      const response: CloudFormationCustomResourceFailedResponse = {
-        Status: "FAILED",
-        Reason: e.message,
-        PhysicalResourceId: this.event.PhysicalResourceId ?? "Unknown",
+      console.log(`Custom resource event completed successfuly...`);
+      return {
+        Status: "SUCCESS",
+        PhysicalResourceId: physicalResourceId,
         StackId: this.event.StackId,
         RequestId: this.event.RequestId,
         LogicalResourceId: this.event.LogicalResourceId,
-        Data: {},
+        Data: data,
       };
-      await this.notify(response);
-      return response;
+    } catch (e) {
+      console.error('Error occured while handling custom resource event: ' + e.message)
+      throw e;
     }
   }
 
   protected abstract consumeEvent(): Promise<ConsumeEventResult>;
-
-  private notify(response: CloudFormationCustomResourceResponse) {
-    return new Promise<void>((resolve, reject) => {
-      const bufBody = Buffer.from(JSON.stringify(response), "utf8");
-
-      const req = https.request(this.event.ResponseURL, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Content-Length": bufBody.length,
-        },
-      });
-
-      function onError(e: Error) {
-        req.removeListener("response", onResponse);
-        reject(e);
-      }
-
-      function onResponse() {
-        req.removeListener("error", onError)
-          .destroy();
-
-        resolve();
-      }
-
-      req.once("error", onError)
-        .once("response", onResponse)
-        .end(bufBody);
-    });
-  }
 }

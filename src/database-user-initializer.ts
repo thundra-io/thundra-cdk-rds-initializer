@@ -1,6 +1,8 @@
 import * as cdk from "@aws-cdk/core";
+import * as cr from "@aws-cdk/custom-resources";
 import * as iam from "@aws-cdk/aws-iam";
 import * as lambda from "@aws-cdk/aws-lambda";
+import * as log from "@aws-cdk/aws-logs";
 import * as secretsmanager from '@aws-cdk/aws-secretsmanager'
 import * as path from "path";
 import { DatabaseInitializerProps, DatabaseUserGrant } from "./database-initializer-props";
@@ -43,32 +45,36 @@ export class DatabaseUserInitializer extends cdk.Resource {
     this.databaseAdminUserSecret = props.databaseAdminUserSecret;
     this.databaseUsers = props.databaseUsers;
 
-    const databaseUserInitializer = new lambda.Function(this, `${this.prefix}-database-user-initializer`, {
-      functionName: `${this.prefix}-database-user-initializer`,
+    const resources: string[] = [this.databaseAdminUserSecret.secretArn];
+    this.databaseUsers.forEach(user => resources.push(user.secret.secretArn));
+
+    const databaseUserInitializerFunction = new lambda.Function(this, `${this.prefix}DatabaseUserInitializerFunction`, {
+      vpc: props.vpc,
+      vpcSubnets: props.vpcSubnets,
+      securityGroups: props.securityGroups,
+      functionName: `${this.prefix}DatabaseUserInitializer`,
       code: lambda.Code.fromAsset(path.join(__dirname, "lambda")),
       handler: "index.databaseUserInitializerHandler",
       runtime: lambda.Runtime.NODEJS_14_X,
       memorySize: 512,
       timeout: cdk.Duration.minutes(1),
-      vpc: props.vpc,
-      vpcSubnets: props.vpcSubnets,
-      securityGroups: props.securityGroups
+      logRetention: log.RetentionDays.ONE_DAY,
+      initialPolicy: [new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret",
+        ],
+        resources: resources,
+      })]
     });
 
-    const resources: string[] = [this.databaseAdminUserSecret.secretArn];
-    this.databaseUsers.forEach(user => resources.push(user.secret.secretArn));
+    const databaseUserInitializerProvider = new cr.Provider(this, `${this.prefix}DatabaseUserInitializerProvider`, {
+      onEventHandler: databaseUserInitializerFunction
+    })
 
-    databaseUserInitializer.addToRolePolicy(new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: [
-        "secretsmanager:GetSecretValue",
-        "secretsmanager:DescribeSecret",
-      ],
-      resources: resources,
-    }));
-
-    new cdk.CustomResource(this, `${this.prefix}-database-user-initializer-resource`, {
-      serviceToken: databaseUserInitializer.functionArn,
+    new cdk.CustomResource(this, `${this.prefix}DatabaseUserInitializerResource`, {
+      serviceToken: databaseUserInitializerProvider.serviceToken,
       properties: {
         Region: cdk.Stack.of(this).region,
         DatabaseAdminUserSecretName: this.databaseAdminUserSecret.secretName,

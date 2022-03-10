@@ -9,11 +9,7 @@ export class DatabaseScriptRunnerUpdateHandler extends CustomResourceHandler<Clo
     const oldProps = this.event.OldResourceProperties;
     if (props.DatabaseAdminUserSecretName !== oldProps.DatabaseAdminUserSecretName || props.Script !== oldProps.Script) {
       const secret = await SecretsManager.getSecret({ region: props.Region, secretId: props.DatabaseAdminUserSecretName });
-      const data = await Database.execute({ secret: secret, script: props.Script });
-      return {
-        physicalResourceId: this.event.PhysicalResourceId,
-        data: data,
-      };
+      await Database.execute({ secret: secret, script: props.Script });
     }
     return {
       physicalResourceId: this.event.PhysicalResourceId,

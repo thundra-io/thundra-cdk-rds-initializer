@@ -9,7 +9,6 @@ export class DatabaseUserInitializerCreateHandler extends CustomResourceHandler<
     const props = this.event.ResourceProperties;
     const physicalResourceId = v4();
     const adminSecret = await SecretsManager.getSecret({ region: props.Region, secretId: props.DatabaseAdminUserSecretName });
-    console.log(`SECRET:\n${JSON.stringify(adminSecret)}`);
     let script = '';
     for (const databaseUser of props.DatabaseUsers) {
       const grants = databaseUser.grants.join();
@@ -24,13 +23,7 @@ export class DatabaseUserInitializerCreateHandler extends CustomResourceHandler<
     }
     if (script) {
       script = script.concat('FLUSH PRIVILEGES;');
-      console.log(`SCRIPT:\n${script}`);
-      const data = await Database.execute({ secret: adminSecret, script: script });
-      console.log(`RESPONSE:\n${JSON.stringify(data)}`);
-      return {
-        physicalResourceId: physicalResourceId,
-        data: data,
-      };
+      await Database.execute({ secret: adminSecret, script: script });
     }
     return {
       physicalResourceId: physicalResourceId,

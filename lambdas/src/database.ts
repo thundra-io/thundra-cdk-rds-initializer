@@ -7,22 +7,11 @@ type DatabaseProps = {
 };
 
 export class Database {
-  public static async execute(props: DatabaseProps) {
+  public static async execute(props: DatabaseProps): Promise<void> {
     const connection = await this.getDatabaseConnection(props.secret);
     try {
       const query = util.promisify(connection.query).bind(connection);
-      const results = await query(props.script);
-      console.log(`RESULTS ${JSON.stringify(results)}`);
-      return {
-        status: 'OK'
-      }
-    } catch (err) {
-      console.error(`ERR:\n${err}`);
-      return {
-        status: 'ERROR',
-        err,
-        message: err.message
-      }
+      await query(props.script);
     } finally {
       connection.end();
     }

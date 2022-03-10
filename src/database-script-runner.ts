@@ -1,10 +1,11 @@
 import * as cdk from "@aws-cdk/core";
+import * as cr from "@aws-cdk/custom-resources";
 import * as iam from "@aws-cdk/aws-iam";
 import * as lambda from "@aws-cdk/aws-lambda";
+import * as log from "@aws-cdk/aws-logs";
 import * as secretsmanager from '@aws-cdk/aws-secretsmanager'
 import * as path from "path";
 import { DatabaseInitializerProps } from "./database-initializer-props";
-
 /**
  *
  */
@@ -29,30 +30,37 @@ export class DatabaseScriptRunner extends cdk.Resource {
     this.databaseAdminUserSecret = props.databaseAdminUserSecret;
     this.script = props.script;
 
-    const databaseScriptRunner = new lambda.Function(this, `${this.prefix}-database-script-runner`, {
-      functionName: `${this.prefix}-database-script-runner`,
+    const databaseScriptRunnerFunction = new lambda.Function(this, `${this.prefix}DatabaseScriptRunnerFunction`, {
+      vpc: props.vpc,
+      vpcSubnets: props.vpcSubnets,
+      securityGroups: props.securityGroups,
+      functionName: `${this.prefix}DatabaseScriptRunner`,
       code: lambda.Code.fromAsset(path.join(__dirname, "lambda")),
       handler: "index.databaseScriptRunnerHandler",
       runtime: lambda.Runtime.NODEJS_14_X,
       memorySize: 512,
       timeout: cdk.Duration.minutes(1),
-      vpc: props.vpc,
-      vpcSubnets: props.vpcSubnets,
-      securityGroups: props.securityGroups
+      logRetention: log.RetentionDays.ONE_DAY,
+      initialPolicy: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: [
+            "secretsmanager:GetSecretValue",
+            "secretsmanager:DescribeSecret",
+          ],
+          resources: [
+            this.databaseAdminUserSecret.secretArn
+          ],
+        })
+      ]
     });
-    databaseScriptRunner.addToRolePolicy(new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: [
-        "secretsmanager:GetSecretValue",
-        "secretsmanager:DescribeSecret",
-      ],
-      resources: [
-        this.databaseAdminUserSecret.secretArn
-      ],
-    }));
 
-    new cdk.CustomResource(this, `${this.prefix}-database-script-runner-resource`, {
-      serviceToken: databaseScriptRunner.functionArn,
+    const databaseScriptRunnerProvider = new cr.Provider(this, `${this.prefix}DatabaseScriptRunnerProvider`, {
+      onEventHandler: databaseScriptRunnerFunction
+    })
+
+    new cdk.CustomResource(this, `${this.prefix}DatabaseScriptRunnerResource`, {
+      serviceToken: databaseScriptRunnerProvider.serviceToken,
       properties: {
         Region: cdk.Stack.of(this).region,
         DatabaseAdminUserSecretName: this.databaseAdminUserSecret.secretName,

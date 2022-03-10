@@ -48,12 +48,7 @@ export class DatabaseUserInitializerUpdateHandler extends CustomResourceHandler<
 
     if (script) {
       script = script.concat('FLUSH PRIVILEGES;');
-      console.log(`User creation script: \n${script}`);
-      const data = await Database.execute({ secret: adminSecret, script: script });
-      return {
-        physicalResourceId: this.event.PhysicalResourceId,
-        data: data,
-      };
+      await Database.execute({ secret: adminSecret, script: script });
     }
     return {
       physicalResourceId: this.event.PhysicalResourceId,

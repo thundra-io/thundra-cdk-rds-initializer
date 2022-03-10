@@ -9,10 +9,10 @@ export class DatabaseScriptRunnerCreateHandler extends CustomResourceHandler<Clo
     const props = this.event.ResourceProperties;
     const physicalResourceId = v4();
     const secret = await SecretsManager.getSecret({ region: props.Region, secretId: props.DatabaseAdminUserSecretName });
-    const data = await Database.execute({ secret: secret, script: props.Script });
+    await Database.execute({ secret: secret, script: props.Script });
     return {
       physicalResourceId: physicalResourceId,
-      data: data,
+      data: {},
     };
   }
 }
