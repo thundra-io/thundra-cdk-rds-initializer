@@ -1,28 +1,28 @@
-import * as mysql from 'mysql';
-import * as util from 'util';
+import * as mysql from 'mysql2/promise';
 
 type DatabaseProps = {
-  secret: string,
+  secret: any,
   script: string
 };
 
 export class Database {
   public static async execute(props: DatabaseProps): Promise<void> {
-    const connection = await this.getDatabaseConnection(props.secret);
+    let connection = null;
     try {
-      const query = util.promisify(connection.query).bind(connection);
-      await query(props.script);
+      connection = await mysql.createConnection({
+        host: props.secret.host,
+        user: props.secret.username,
+        password: props.secret.password,
+        multipleStatements: true
+      });
+      await connection.beginTransaction();
+      const [response, meta] = await connection.query(props.script);
+      await connection.commit();
+    } catch (error) {
+      if (connection) await connection.rollback();
+      throw error;
     } finally {
-      connection.end();
+      if (connection) await connection.end();
     }
-  }
-
-  private static async getDatabaseConnection(secret: any): Promise<mysql.Connection> {
-    return mysql.createConnection({
-      host: secret.host,
-      user: secret.username,
-      password: secret.password,
-      multipleStatements: true
-    });
   }
 }

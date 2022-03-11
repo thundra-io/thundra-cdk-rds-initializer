@@ -22,7 +22,7 @@ export class DatabaseUserInitializerCreateHandler extends CustomResourceHandler<
       }
     }
     if (script) {
-      script = script.concat('FLUSH PRIVILEGES;');
+      script = script.concat('FLUSH PRIVILEGES;\n');
       await Database.execute({ secret: adminSecret, script: script });
     }
     return {
