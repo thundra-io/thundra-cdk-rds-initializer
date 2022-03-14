@@ -3,7 +3,7 @@
   "description": "Lambda handler for running custom database script",
   "scripts": {
     "clean": "rimraf dist coverage tsconfig.tsbuildinfo",
-    "test": "jest",
+    "test": "AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test jest",
     "prebuild": "npm run clean",
     "build": "esbuild src/index.ts --bundle --minify --target=node14 --platform=node --outfile=../dist/lambda/index.js",
     "build:tsc": "tsc -p tsconfig.json"

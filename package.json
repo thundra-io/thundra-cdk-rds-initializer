@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "eslint . --ext .ts",
     "clean": "rimraf dist coverage tsconfig.tsbuildinfo",
-    "test": "jest",
+    "test": "AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test jest",
     "prebuild": "npm run clean",
     "build": "tsc -p tsconfig.json",
     "prepublishOnly": "npm run build && cd lambdas && npm run build"
