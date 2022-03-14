@@ -6,7 +6,7 @@
     "test": "jest",
     "prebuild": "npm run clean",
     "build": "esbuild src/index.ts --bundle --minify --target=node14 --platform=node --outfile=../dist/lambda/index.js",
-    "build:tsc": "tsc"
+    "build:tsc": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.52.0",
