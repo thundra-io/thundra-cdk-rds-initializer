@@ -5,81 +5,82 @@ import * as lambda from "@aws-cdk/aws-lambda";
 import * as log from "@aws-cdk/aws-logs";
 import * as secretsmanager from '@aws-cdk/aws-secretsmanager'
 import * as path from "path";
-import { DatabaseInitializerProps } from "./database-initializer-props";
+import {DatabaseInitializerProps} from "./database-initializer-props";
+
 /**
  *
  */
 export interface DatabaseScriptRunnerProps extends DatabaseInitializerProps {
-  /**
-   * 
-   */
-  readonly script: string;
+    /**
+     *
+     */
+    readonly script: string;
 }
 
 /**
- * 
+ *
  */
 export class DatabaseScriptRunner extends cdk.Resource {
-  private readonly prefix: string;
-  private readonly databaseAdminUserSecret: secretsmanager.ISecret;
-  private readonly script: string;
+    private readonly prefix: string;
+    private readonly databaseAdminUserSecret: secretsmanager.ISecret;
+    private readonly script: string;
 
-  public constructor(scope: cdk.Construct, id: string, props: DatabaseScriptRunnerProps) {
-    super(scope, id);
-    this.prefix = props.prefix;
-    this.databaseAdminUserSecret = props.databaseAdminUserSecret;
-    this.script = props.script;
+    public constructor(scope: cdk.Construct, id: string, props: DatabaseScriptRunnerProps) {
+        super(scope, id);
+        this.prefix = props.prefix;
+        this.databaseAdminUserSecret = props.databaseAdminUserSecret;
+        this.script = props.script;
 
-    const databaseScriptRunnerFunction = new lambda.Function(this, `${this.prefix}DatabaseScriptRunnerFunction`, {
-      vpc: props.vpc,
-      vpcSubnets: props.vpcSubnets,
-      securityGroups: props.securityGroups,
-      functionName: `${this.prefix}DatabaseScriptRunner`,
-      code: lambda.Code.fromAsset(path.join(__dirname, "lambda")),
-      handler: "index.databaseScriptRunnerHandler",
-      runtime: lambda.Runtime.NODEJS_14_X,
-      memorySize: 512,
-      timeout: cdk.Duration.minutes(1),
-      logRetention: log.RetentionDays.ONE_DAY,
-      initialPolicy: [
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          actions: [
-            "secretsmanager:GetSecretValue",
-            "secretsmanager:DescribeSecret",
-          ],
-          resources: [
-            this.databaseAdminUserSecret.secretArn
-          ],
+        const databaseScriptRunnerFunction = new lambda.Function(this, `${this.prefix}DatabaseScriptRunnerFunction`, {
+            vpc: props.vpc,
+            vpcSubnets: props.vpcSubnets,
+            securityGroups: props.securityGroups,
+            functionName: `${this.prefix}DatabaseScriptRunner`,
+            code: lambda.Code.fromAsset(path.join(__dirname, "lambda")),
+            handler: "index.databaseScriptRunnerHandler",
+            runtime: lambda.Runtime.NODEJS_14_X,
+            memorySize: 512,
+            timeout: cdk.Duration.minutes(1),
+            logRetention: log.RetentionDays.ONE_DAY,
+            initialPolicy: [
+                new iam.PolicyStatement({
+                    effect: iam.Effect.ALLOW,
+                    actions: [
+                        "secretsmanager:GetSecretValue",
+                        "secretsmanager:DescribeSecret",
+                    ],
+                    resources: [
+                        this.databaseAdminUserSecret.secretArn
+                    ],
+                })
+            ]
+        });
+
+        const databaseScriptRunnerProvider = new cr.Provider(this, `${this.prefix}DatabaseScriptRunnerProvider`, {
+            onEventHandler: databaseScriptRunnerFunction
         })
-      ]
-    });
 
-    const databaseScriptRunnerProvider = new cr.Provider(this, `${this.prefix}DatabaseScriptRunnerProvider`, {
-      onEventHandler: databaseScriptRunnerFunction
-    })
+        new cdk.CustomResource(this, `${this.prefix}DatabaseScriptRunnerResource`, {
+            serviceToken: databaseScriptRunnerProvider.serviceToken,
+            properties: {
+                Region: cdk.Stack.of(this).region,
+                DatabaseAdminUserSecretName: this.databaseAdminUserSecret.secretName,
+                Script: this.script
+            },
+        });
+    }
 
-    new cdk.CustomResource(this, `${this.prefix}DatabaseScriptRunnerResource`, {
-      serviceToken: databaseScriptRunnerProvider.serviceToken,
-      properties: {
-        Region: cdk.Stack.of(this).region,
-        DatabaseAdminUserSecretName: this.databaseAdminUserSecret.secretName,
-        Script: this.script
-      },
-    });
-  }
+    protected validate(): string[] {
+        const errors: string[] = [];
 
-  // protected validate(): string[] {
-  //   const errors: string[] = [];
-  //   // Ensure the zone name is a parent zone of the certificate domain name
-  //   if (!cdk.Token.isUnresolved(this.databaseAdminUserSecret)) {
-  //     errors.push(`databaseAdminUserSecret is not null`);
-  //   }
+        if (this.prefix.trim().length === 0) {
+            errors.push('Prefix properties must not be empty.');
+        }
 
-  //   if (this.script) {
-  //     errors.push(`script is not empty`);
-  //   }
+        if (this.script.trim().length === 0) {
+            errors.push('Script properties must not be empty.');
+        }
 
-  //   return errors;
-  // }
+        return errors;
+    }
 }

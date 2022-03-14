@@ -1,15 +1,22 @@
 {
   "compilerOptions": {
-      "module": "commonjs",
-      "target": "es2019",
-      "rootDir": "src",
-      "outDir": "dist",
-      "noImplicitAny": true,
-      "declaration": true,
-      "sourceMap": false,
-      "strictNullChecks": true
+    "declaration": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "target": "es2019",
+    "composite": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "preserveConstEnums": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "strictNullChecks": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "include": [
-      "src/**/*.ts"
+    "src/**/*.ts"
   ]
 }
