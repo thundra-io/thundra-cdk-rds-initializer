@@ -1,6 +1,6 @@
 {
   "name": "thundra-cdk-rds-initializer-handler",
-  "description": "AWS CDK custom resource to initialize AWS RDS database",
+  "description": "Lambda handler for running custom database script",
   "scripts": {
     "clean": "rimraf dist coverage tsconfig.tsbuildinfo",
     "test": "AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test jest",
