@@ -4,21 +4,35 @@ import * as secretsmanager from '@aws-cdk/aws-secretsmanager'
 
 export interface DatabaseInitializerProps {
     /**
-     *
+     * Prefix to be used to name custom resources
      */
     readonly prefix: string;
     /**
-     *
+     * Secret to be used for database connection
      */
     readonly databaseAdminUserSecret: secretsmanager.ISecret;
-
+    /**
+     * Vpc where custom resource lambda will be deployed
+     */
     readonly vpc?: ec2.IVpc;
-
+    /**
+     * Subnet where custom resource lambda will be deployed
+     */
     readonly vpcSubnets?: ec2.SubnetSelection;
-
+    /**
+     * SecurityGroup that custom resource lambda will use
+     */
     readonly securityGroups?: ec2.ISecurityGroup[];
+    /**
+     * Database engine type. Like MySQL or PostgreSQL
+     */
+    readonly databaseEngine: DatabaseEngine;
 }
 
+export enum DatabaseEngine {
+    MySQL = 'MySQL',
+    PostgreSQL = 'PostgreSQL'
+}
 
 export enum DatabaseUserGrant {
     /**

@@ -5,7 +5,7 @@ import * as lambda from "@aws-cdk/aws-lambda";
 import * as log from "@aws-cdk/aws-logs";
 import * as secretsmanager from '@aws-cdk/aws-secretsmanager'
 import * as path from "path";
-import {DatabaseInitializerProps, DatabaseUserGrant} from "./database-initializer-props";
+import {DatabaseEngine, DatabaseInitializerProps, DatabaseUserGrant} from "./database-initializer-props";
 
 
 export interface IAMUser {
@@ -33,6 +33,7 @@ export interface DatabaseUserInitializerProps extends DatabaseInitializerProps {
 export class DatabaseUserInitializer extends cdk.Resource {
     private readonly prefix: string;
     private readonly databaseAdminUserSecret: secretsmanager.ISecret;
+    private readonly databaseEngine: DatabaseEngine;
     private readonly databaseUsers: {
         username: string;
         grants: DatabaseUserGrant[];
@@ -43,6 +44,7 @@ export class DatabaseUserInitializer extends cdk.Resource {
         super(scope, id);
         this.prefix = props.prefix
         this.databaseAdminUserSecret = props.databaseAdminUserSecret;
+        this.databaseEngine = props.databaseEngine;
         this.databaseUsers = props.databaseUsers;
 
         const resources: string[] = [this.databaseAdminUserSecret.secretArn];
@@ -105,19 +107,24 @@ export class DatabaseUserInitializer extends cdk.Resource {
             properties: {
                 Region: cdk.Stack.of(this).region,
                 DatabaseAdminUserSecretName: this.databaseAdminUserSecret.secretName,
-                DatabaseUsers: paramater
+                DatabaseUsers: paramater,
+                DatabaseEngine: this.databaseEngine
             },
         });
     }
 
     protected validate(): string[] {
         const errors: string[] = [];
-        if (this.prefix.trim().length === 0) {
+        if (this.prefix == null || this.prefix.trim().length === 0) {
             errors.push('Prefix properties must not be empty.');
         }
 
-        if (this.databaseUsers.length === 0) {
-            errors.push('Database users properties must not be empty');
+        if (this.databaseUsers == null || this.databaseUsers.length === 0) {
+            errors.push('Database users properties must not be empty.');
+        }
+
+        if (this.databaseEngine == null || DatabaseEngine.MySQL !== this.databaseEngine) {
+            errors.push('Only MySQL database engine is supported now.');
         }
 
         return errors;

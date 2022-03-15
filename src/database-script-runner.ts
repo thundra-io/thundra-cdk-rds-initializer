@@ -5,14 +5,14 @@ import * as lambda from "@aws-cdk/aws-lambda";
 import * as log from "@aws-cdk/aws-logs";
 import * as secretsmanager from '@aws-cdk/aws-secretsmanager'
 import * as path from "path";
-import {DatabaseInitializerProps} from "./database-initializer-props";
+import {DatabaseEngine, DatabaseInitializerProps} from "./database-initializer-props";
 
 /**
  *
  */
 export interface DatabaseScriptRunnerProps extends DatabaseInitializerProps {
     /**
-     *
+     * Script to be run by custom resource.
      */
     readonly script: string;
 }
@@ -24,12 +24,14 @@ export class DatabaseScriptRunner extends cdk.Resource {
     private readonly prefix: string;
     private readonly databaseAdminUserSecret: secretsmanager.ISecret;
     private readonly script: string;
+    private readonly databaseEngine: DatabaseEngine;
 
     public constructor(scope: cdk.Construct, id: string, props: DatabaseScriptRunnerProps) {
         super(scope, id);
         this.prefix = props.prefix;
         this.databaseAdminUserSecret = props.databaseAdminUserSecret;
         this.script = props.script;
+        this.databaseEngine = props.databaseEngine;
 
         const databaseScriptRunnerFunction = new lambda.Function(this, `${this.prefix}DatabaseScriptRunnerFunction`, {
             vpc: props.vpc,
@@ -65,7 +67,8 @@ export class DatabaseScriptRunner extends cdk.Resource {
             properties: {
                 Region: cdk.Stack.of(this).region,
                 DatabaseAdminUserSecretName: this.databaseAdminUserSecret.secretName,
-                Script: this.script
+                Script: this.script,
+                DatabaseEngine: this.databaseEngine
             },
         });
     }
@@ -73,12 +76,16 @@ export class DatabaseScriptRunner extends cdk.Resource {
     protected validate(): string[] {
         const errors: string[] = [];
 
-        if (this.prefix.trim().length === 0) {
+        if (this.prefix == null || this.prefix.trim().length === 0) {
             errors.push('Prefix properties must not be empty.');
         }
 
-        if (this.script.trim().length === 0) {
+        if (this.script == null || this.script.trim().length === 0) {
             errors.push('Script properties must not be empty.');
+        }
+
+        if (this.databaseEngine == null || DatabaseEngine.MySQL !== this.databaseEngine) {
+            errors.push('Only MySQL database engine is supported now.');
         }
 
         return errors;
