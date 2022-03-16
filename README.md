@@ -1,10 +1,9 @@
 # @thundra/cdk-rds-initializer
 ## RDS Database User Initializer and Script Runner Construct for AWS CDK
 
-This package provides Constructs for creating database user & running database script which can be used in RDS.
+This package provides AWS CDK constructs for automatically creating database user(s) and running database script(s) on target AWS RDS database.
 
-This package automatically create database user and run database script.
-
+This package 
 -----
 
 ## About CDK Compatibility
