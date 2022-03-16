@@ -1,0 +1,57 @@
+{
+  "name": "@thundra/cdk-rds-initializer",
+  "version": "0.0.1",
+  "description": "AWS CDK custom resource to initialize AWS RDS database",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "lint": "eslint . --ext .ts",
+    "clean": "rimraf dist coverage tsconfig.tsbuildinfo",
+    "test": "AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test jest",
+    "prebuild": "npm run clean",
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build && cd lambdas && npm run build"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-iam": "1.137.0",
+    "@aws-cdk/aws-lambda": "1.137.0",
+    "@aws-cdk/aws-secretsmanager": "1.137.0",
+    "@aws-cdk/core": "1.137.0",
+    "@aws-cdk/custom-resources": "1.137.0"
+  },
+  "devDependencies": {
+    "@aws-cdk/assertions": "1.137.0",
+    "@types/jest": "^27.4.1",
+    "@types/node": "^16.11.6",
+    "@typescript-eslint/eslint-plugin": "^5.14.0",
+    "@typescript-eslint/parser": "^5.14.0",
+    "aws-cdk": "1.137.0",
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.3",
+    "ts-node": "^10.7.0",
+    "typescript": "4.5.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thundra-io/thundra-cdk-rds-initializer.git"
+  },
+  "keywords": [
+    "aws",
+    "aws-cdk",
+    "aws-cdk-construct",
+    "aws-rds",
+    "rds"
+  ],
+  "author": "Tolga Takır <tolga@thundra.io>",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/thundra-io/thundra-cdk-rds-initializer/issues"
+  },
+  "homepage": "https://github.com/thundra-io/thundra-cdk-rds-initializer#readme"
+}
