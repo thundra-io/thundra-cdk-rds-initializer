@@ -1,39 +1,51 @@
 import * as ec2 from '@aws-cdk/aws-ec2'
 import * as secretsmanager from '@aws-cdk/aws-secretsmanager'
 
-
+/**
+ * Base properties for database initializer resources.
+ */
 export interface DatabaseInitializerProps {
     /**
-     * Prefix to be used to name custom resources
+     * Prefix to be used to name custom resources.
      */
     readonly prefix: string;
     /**
-     * Secret to be used for database connection
+     * Secret to be used for database connection.
+     * Secret must contain database information.
      */
     readonly databaseAdminUserSecret: secretsmanager.ISecret;
     /**
-     * Vpc where custom resource lambda will be deployed
+     * Vpc where custom resource lambda will be deployed.
+     * If database is in vpc, database vpc should be given.
      */
     readonly vpc?: ec2.IVpc;
     /**
-     * Subnet where custom resource lambda will be deployed
+     * Subnet where custom resource lambda will be deployed.
+     * Must be the same as the database subnet.
      */
     readonly vpcSubnets?: ec2.SubnetSelection;
     /**
-     * SecurityGroup that custom resource lambda will use
+     * SecurityGroup that custom resource lambda will use.
+     * Security group must have internet access as lambda  needs access to secret manager.
      */
     readonly securityGroups?: ec2.ISecurityGroup[];
     /**
-     * Database engine type. Like MySQL or PostgreSQL
+     * Database engine type. Like MySQL or PostgreSQL.
      */
     readonly databaseEngine: DatabaseEngine;
 }
 
+/**
+ * Database engine type.
+ */
 export enum DatabaseEngine {
     MySQL = 'MySQL',
     PostgreSQL = 'PostgreSQL'
 }
 
+/**
+ * Database user grant types.
+ */
 export enum DatabaseUserGrant {
     /**
      * Grant all privileges at specified access level except GRANT OPTION and PROXY.

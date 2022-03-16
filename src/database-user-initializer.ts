@@ -7,28 +7,52 @@ import * as secretsmanager from '@aws-cdk/aws-secretsmanager'
 import * as path from "path";
 import {DatabaseEngine, DatabaseInitializerProps, DatabaseUserGrant} from "./database-initializer-props";
 
-
+/**
+ * Properties to create a database user with IAM support on AWS RDS
+ */
 export interface IAMUser {
     username: string;
     grants: DatabaseUserGrant[];
 }
 
+/**
+ * Properties to create a database user with password on AWS RDS
+ */
 export interface User extends IAMUser {
     secret: secretsmanager.ISecret;
 }
 
 /**
- *
+ * Properties to create a database user on AWS RDS
  */
 export interface DatabaseUserInitializerProps extends DatabaseInitializerProps {
     /**
-     *
+     * List of users to be creating on AWS RDS
      */
     readonly databaseUsers: (User | IAMUser)[];
 }
 
 /**
+ * A resource to create database user on AWS RDS.
  *
+ * @example
+ *
+ * new DatabaseUserInitializer(this, 'SampleDatabaseUserInitializer', {
+ *       prefix: 'Sample',
+ *       databaseAdminUserSecret: secret,
+ *       databaseEngine: DatabaseEngine.MySQL,
+ *       databaseUsers: [
+ *         {
+ *           username: 'sample_rw_user',
+ *           grants: [DatabaseUserGrant.ALL_PRIVILEGES],
+ *           secret: userSecret
+ *         },
+ *         {
+ *           username: 'sample_iam_user',
+ *           grants: [DatabaseUserGrant.SELECT, DatabaseUserGrant.INSERT, DatabaseUserGrant.UPDATE],
+ *         }
+ *       ]
+ * });
  */
 export class DatabaseUserInitializer extends cdk.Resource {
     private readonly prefix: string;

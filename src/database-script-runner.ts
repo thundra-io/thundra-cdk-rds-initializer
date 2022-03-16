@@ -8,17 +8,26 @@ import * as path from "path";
 import {DatabaseEngine, DatabaseInitializerProps} from "./database-initializer-props";
 
 /**
- *
+ * Properties to run a database script on AWS RDS
  */
 export interface DatabaseScriptRunnerProps extends DatabaseInitializerProps {
     /**
-     * Script to be run by custom resource.
+     * Script to run in database.
      */
     readonly script: string;
 }
 
 /**
+ * A resource to run database script on AWS RDS.
  *
+ * @example
+ *
+ * new DatabaseScriptRunner(this, 'SampleDatabaseScriptRunner', {
+ *      prefix: 'Sample',
+ *      databaseAdminUserSecret: secret,
+ *      databaseEngine: DatabaseEngine.MySQL,
+ *      script: 'select 1 from dual;'
+ * });
  */
 export class DatabaseScriptRunner extends cdk.Resource {
     private readonly prefix: string;
