@@ -55,5 +55,8 @@
   "bugs": {
     "url": "https://github.com/thundra-io/thundra-cdk-rds-initializer/issues"
   },
-  "homepage": "https://github.com/thundra-io/thundra-cdk-rds-initializer#readme"
+  "homepage": "https://github.com/thundra-io/thundra-cdk-rds-initializer#readme",
+  "publishConfig": {
+    "access": "public"
+  }
 }
