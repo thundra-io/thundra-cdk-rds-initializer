@@ -36,7 +36,7 @@ jobs:
         run: npm install
 
       - name: NPM Publish
-        run: npm run relaese
+        run: npm run release
         env:
           VERSION_SCALE: ${{ github.event.inputs.version_scale }}
           NODE_AUTH_TOKEN: ${{ secrets.THUNDRA_NPM_API_KEY }}
