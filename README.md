@@ -20,7 +20,7 @@ This package automatically create database user and run database script.
 ### npm
 
 ```shell
-npm i -D @thundra/cdk-rds-initializer
+npm i @thundra/cdk-rds-initializer
 ```
 
 ## Example
