@@ -1,5 +1,6 @@
 *.ts
 !*.d.ts
 
+.github
 lambdas
 tsconfig.json
