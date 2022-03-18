@@ -2,5 +2,7 @@
 !*.d.ts
 
 .github
+.eslintignore
+.eslintrc
 lambdas
 tsconfig.json
