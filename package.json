@@ -13,20 +13,25 @@
     "prepublishOnly": "npm run build && cd lambdas && npm run build",
     "release": "release-it ${VERSION_SCALE} --ci --git.commit --git.push --git.tag --git.tagName='v${version}' --github.release --no-git.requireCleanWorkingDir --no-git.requireUpstream --npm.publish --npm.skipChecks"
   },
-  "dependencies": {
-    "@aws-cdk/aws-iam": "1.137.0",
-    "@aws-cdk/aws-lambda": "1.137.0",
-    "@aws-cdk/aws-secretsmanager": "1.137.0",
-    "@aws-cdk/core": "1.137.0",
-    "@aws-cdk/custom-resources": "1.137.0"
+  "peerDependencies": {
+    "@aws-cdk/aws-iam": "1.148.0",
+    "@aws-cdk/aws-lambda": "1.148.0",
+    "@aws-cdk/aws-secretsmanager": "1.148.0",
+    "@aws-cdk/core": "1.148.0",
+    "@aws-cdk/custom-resources": "1.148.0"
   },
   "devDependencies": {
-    "@aws-cdk/assertions": "1.137.0",
+    "@aws-cdk/assertions": "1.148.0",
+    "@aws-cdk/aws-iam": "1.148.0",
+    "@aws-cdk/aws-lambda": "1.148.0",
+    "@aws-cdk/aws-secretsmanager": "1.148.0",
+    "@aws-cdk/core": "1.148.0",
+    "@aws-cdk/custom-resources": "1.148.0",
     "@types/jest": "^27.4.1",
     "@types/node": "^16.11.6",
     "@typescript-eslint/eslint-plugin": "^5.14.0",
     "@typescript-eslint/parser": "^5.14.0",
-    "aws-cdk": "1.137.0",
+    "aws-cdk": "1.148.0",
     "jest": "^27.5.1",
     "release-it": "^14.12.5",
     "ts-jest": "^27.1.3",
