@@ -22,31 +22,32 @@ export interface DatabaseScriptRunnerProps extends DatabaseInitializerProps {
  *
  * @example
  *
- * new DatabaseScriptRunner(this, 'SampleDatabaseScriptRunner', {
- *      prefix: 'Sample',
+ * new DatabaseScriptRunner(this, 'sample-database-script-runner', {
  *      databaseAdminUserSecret: secret,
  *      databaseEngine: DatabaseEngine.MySQL,
  *      script: 'select 1 from dual;'
  * });
  */
 export class DatabaseScriptRunner extends cdk.Resource {
-    private readonly prefix: string;
+    private readonly prefix?: string;
+    private readonly postfix?: string;
     private readonly databaseAdminUserSecret: secretsmanager.ISecret;
     private readonly script: string;
     private readonly databaseEngine: DatabaseEngine;
 
     public constructor(scope: cdk.Construct, id: string, props: DatabaseScriptRunnerProps) {
         super(scope, id);
-        this.prefix = props.prefix;
+        this.prefix = props.prefix || '';
+        this.postfix = props.postfix || '';
         this.databaseAdminUserSecret = props.databaseAdminUserSecret;
         this.script = props.script;
         this.databaseEngine = props.databaseEngine;
 
-        const databaseScriptRunnerFunction = new lambda.Function(this, `${this.prefix}DatabaseScriptRunnerFunction`, {
+        const databaseScriptRunnerFunction = new lambda.Function(this, `${this.prefix}database-script-runner-function${this.postfix}`, {
             vpc: props.vpc,
             vpcSubnets: props.vpcSubnets,
             securityGroups: props.securityGroups,
-            functionName: `${this.prefix}DatabaseScriptRunner`,
+            functionName: `${this.prefix}database-script-runner${this.postfix}`,
             code: lambda.Code.fromAsset(path.join(__dirname, "lambda")),
             handler: "index.databaseScriptRunnerHandler",
             runtime: lambda.Runtime.NODEJS_14_X,
@@ -67,11 +68,12 @@ export class DatabaseScriptRunner extends cdk.Resource {
             ]
         });
 
-        const databaseScriptRunnerProvider = new cr.Provider(this, `${this.prefix}DatabaseScriptRunnerProvider`, {
-            onEventHandler: databaseScriptRunnerFunction
+        const databaseScriptRunnerProvider = new cr.Provider(this, `${this.prefix}database-script-runner-provider${this.postfix}`, {
+            onEventHandler: databaseScriptRunnerFunction,
+            providerFunctionName: `${this.prefix}database-script-runner-provider${this.postfix}`
         })
 
-        new cdk.CustomResource(this, `${this.prefix}DatabaseScriptRunnerResource`, {
+        new cdk.CustomResource(this, `${this.prefix}database-script-runner-resource${this.postfix}`, {
             serviceToken: databaseScriptRunnerProvider.serviceToken,
             properties: {
                 Region: cdk.Stack.of(this).region,
@@ -84,10 +86,6 @@ export class DatabaseScriptRunner extends cdk.Resource {
 
     protected validate(): string[] {
         const errors: string[] = [];
-
-        if (this.prefix == null || this.prefix.trim().length === 0) {
-            errors.push('Prefix properties must not be empty.');
-        }
 
         if (this.script == null || this.script.trim().length === 0) {
             errors.push('Script properties must not be empty.');

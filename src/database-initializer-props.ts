@@ -8,7 +8,11 @@ export interface DatabaseInitializerProps {
     /**
      * Prefix to be used to name custom resources.
      */
-    readonly prefix: string;
+    readonly prefix?: string;
+    /**
+     * Postfix to be used to name custom resources.
+     */
+    readonly postfix?: string;
     /**
      * Secret to be used for database connection.
      * Secret must contain database information.

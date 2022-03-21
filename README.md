@@ -132,7 +132,6 @@ import * as thundra from '@thundra/cdk-rds-initializer';
     // Database Initializer
     //
     const userInitializer = new thundra.DatabaseUserInitializer(this, 'sample-database-user-initializer', {
-        prefix: 'Sample',
         databaseAdminUserSecret: sampleDatabaseAdminUserSecret,
         databaseEngine: thundra.DatabaseEngine.MySQL,
         databaseUsers: [
@@ -151,7 +150,6 @@ import * as thundra from '@thundra/cdk-rds-initializer';
     userInitializer.node.addDependency(sampleDatabaseCluster);
     
     const scriptRunner = new thundra.DatabaseScriptRunner(this, 'sample-database-script-runner', {
-      prefix: 'Sample',
       databaseAdminUserSecret: sampleDatabaseAdminUserSecret,
       databaseEngine: thundra.DatabaseEngine.MySQL,
       script: 'select 1 from dual;'
@@ -180,7 +178,11 @@ export interface DatabaseInitializerProps {
     /**
      * Prefix to be used to name custom resources.
      */
-    readonly prefix: string;
+    readonly prefix?: string;
+    /**
+     * Postfix to be used to name custom resources.
+     */
+    readonly postfix?: string;
     /**
      * Secret to be used for database connection.
      * Secret must contain database information.
@@ -235,7 +237,11 @@ export interface DatabaseInitializerProps {
     /**
      * Prefix to be used to name custom resources.
      */
-    readonly prefix: string;
+    readonly prefix?: string;
+    /**
+     * Postfix to be used to name custom resources.
+     */
+    readonly postfix?: string;
     /**
      * Secret to be used for database connection.
      * Secret must contain database information.

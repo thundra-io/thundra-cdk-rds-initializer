@@ -37,8 +37,7 @@ export interface DatabaseUserInitializerProps extends DatabaseInitializerProps {
  *
  * @example
  *
- * new DatabaseUserInitializer(this, 'SampleDatabaseUserInitializer', {
- *       prefix: 'Sample',
+ * new DatabaseUserInitializer(this, 'sample-database-user-initializer', {
  *       databaseAdminUserSecret: secret,
  *       databaseEngine: DatabaseEngine.MySQL,
  *       databaseUsers: [
@@ -55,7 +54,8 @@ export interface DatabaseUserInitializerProps extends DatabaseInitializerProps {
  * });
  */
 export class DatabaseUserInitializer extends cdk.Resource {
-    private readonly prefix: string;
+    private readonly prefix?: string;
+    private readonly postfix?: string;
     private readonly databaseAdminUserSecret: secretsmanager.ISecret;
     private readonly databaseEngine: DatabaseEngine;
     private readonly databaseUsers: {
@@ -66,7 +66,8 @@ export class DatabaseUserInitializer extends cdk.Resource {
 
     public constructor(scope: cdk.Construct, id: string, props: DatabaseUserInitializerProps) {
         super(scope, id);
-        this.prefix = props.prefix
+        this.prefix = props.prefix || '';
+        this.postfix = props.postfix || '';
         this.databaseAdminUserSecret = props.databaseAdminUserSecret;
         this.databaseEngine = props.databaseEngine;
         this.databaseUsers = props.databaseUsers;
@@ -78,11 +79,11 @@ export class DatabaseUserInitializer extends cdk.Resource {
             }
         });
 
-        const databaseUserInitializerFunction = new lambda.Function(this, `${this.prefix}DatabaseUserInitializerFunction`, {
+        const databaseUserInitializerFunction = new lambda.Function(this, `${this.prefix}database-user-initializer-function${this.postfix}`, {
             vpc: props.vpc,
             vpcSubnets: props.vpcSubnets,
             securityGroups: props.securityGroups,
-            functionName: `${this.prefix}DatabaseUserInitializer`,
+            functionName: `${this.prefix}database-user-initializer${this.postfix}`,
             code: lambda.Code.fromAsset(path.join(__dirname, "lambda")),
             handler: "index.databaseUserInitializerHandler",
             runtime: lambda.Runtime.NODEJS_14_X,
@@ -99,11 +100,12 @@ export class DatabaseUserInitializer extends cdk.Resource {
             })]
         });
 
-        const databaseUserInitializerProvider = new cr.Provider(this, `${this.prefix}DatabaseUserInitializerProvider`, {
-            onEventHandler: databaseUserInitializerFunction
+        const databaseUserInitializerProvider = new cr.Provider(this, `${this.prefix}database-user-initializer-provider${this.postfix}`, {
+            onEventHandler: databaseUserInitializerFunction,
+            providerFunctionName: `${this.prefix}database-user-initializer-provider${this.postfix}`,
         })
 
-        const paramater: {
+        const parameter: {
             username: string;
             grants: DatabaseUserGrant[];
             secretName?: string;
@@ -111,14 +113,14 @@ export class DatabaseUserInitializer extends cdk.Resource {
         }[] = []
         this.databaseUsers.forEach(user => {
             if (user.secret) {
-                paramater.push({
+                parameter.push({
                     username: user.username,
                     grants: user.grants,
                     secretName: user.secret!.secretName,
                     isIAMUser: false
                 })
             } else {
-                paramater.push({
+                parameter.push({
                     username: user.username,
                     grants: user.grants,
                     isIAMUser: true
@@ -126,12 +128,12 @@ export class DatabaseUserInitializer extends cdk.Resource {
             }
         });
 
-        new cdk.CustomResource(this, `${this.prefix}DatabaseUserInitializerResource`, {
+        new cdk.CustomResource(this, `${this.prefix}database-user-initializer-resource${this.postfix}`, {
             serviceToken: databaseUserInitializerProvider.serviceToken,
             properties: {
                 Region: cdk.Stack.of(this).region,
                 DatabaseAdminUserSecretName: this.databaseAdminUserSecret.secretName,
-                DatabaseUsers: paramater,
+                DatabaseUsers: parameter,
                 DatabaseEngine: this.databaseEngine
             },
         });
@@ -139,9 +141,6 @@ export class DatabaseUserInitializer extends cdk.Resource {
 
     protected validate(): string[] {
         const errors: string[] = [];
-        if (this.prefix == null || this.prefix.trim().length === 0) {
-            errors.push('Prefix properties must not be empty.');
-        }
 
         if (this.databaseUsers == null || this.databaseUsers.length === 0) {
             errors.push('Database users properties must not be empty.');
