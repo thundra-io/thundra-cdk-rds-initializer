@@ -1,4 +1,4 @@
-import * as cdk from 'aws-cdk-lib/core';
+import * as cdk from 'aws-cdk-lib';
 import * as cr from 'aws-cdk-lib/custom-resources';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
@@ -140,17 +140,17 @@ export class DatabaseUserInitializer extends cdk.Resource {
         });
     }
 
-    protected validate(): string[] {
-        const errors: string[] = [];
+    // protected validate(): string[] {
+    //     const errors: string[] = [];
 
-        if (this.databaseUsers == null || this.databaseUsers.length === 0) {
-            errors.push('Database users properties must not be empty.');
-        }
+    //     if (this.databaseUsers == null || this.databaseUsers.length === 0) {
+    //         errors.push('Database users properties must not be empty.');
+    //     }
 
-        if (this.databaseEngine == null || DatabaseEngine.MySQL !== this.databaseEngine) {
-            errors.push('Only MySQL database engine is supported now.');
-        }
+    //     if (this.databaseEngine == null || DatabaseEngine.MySQL !== this.databaseEngine) {
+    //         errors.push('Only MySQL database engine is supported now.');
+    //     }
 
-        return errors;
-    }
+    //     return errors;
+    // }
 }

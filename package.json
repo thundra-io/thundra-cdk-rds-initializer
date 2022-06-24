@@ -1,6 +1,6 @@
 {
   "name": "@thundra/cdk-rds-initializer",
-  "version": "0.0.5",
+  "version": "0.2.0",
   "description": "AWS CDK custom resource to initialize AWS RDS database",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,7 @@
     "release": "release-it ${VERSION_SCALE} --ci --git.commit --git.push --git.tag --git.tagName='v${version}' --github.release --no-git.requireCleanWorkingDir --no-git.requireUpstream --npm.publish --npm.skipChecks"
   },
   "peerDependencies": {
-    "aws-cdk-lib": "2.27.0",
+    "aws-cdk": "2.27.0",
     "constructs": "^10.0.0"
   },
   "devDependencies": {
