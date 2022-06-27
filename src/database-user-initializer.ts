@@ -139,18 +139,4 @@ export class DatabaseUserInitializer extends cdk.Resource {
             },
         });
     }
-
-    // protected validate(): string[] {
-    //     const errors: string[] = [];
-
-    //     if (this.databaseUsers == null || this.databaseUsers.length === 0) {
-    //         errors.push('Database users properties must not be empty.');
-    //     }
-
-    //     if (this.databaseEngine == null || DatabaseEngine.MySQL !== this.databaseEngine) {
-    //         errors.push('Only MySQL database engine is supported now.');
-    //     }
-
-    //     return errors;
-    // }
 }

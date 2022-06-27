@@ -84,18 +84,4 @@ export class DatabaseScriptRunner extends cdk.Resource {
             },
         });
     }
-
-    // protected validate(): string[] {
-    //     const errors: string[] = [];
-
-    //     if (this.script == null || this.script.trim().length === 0) {
-    //         errors.push('Script properties must not be empty.');
-    //     }
-
-    //     if (this.databaseEngine == null || DatabaseEngine.MySQL !== this.databaseEngine) {
-    //         errors.push('Only MySQL database engine is supported now.');
-    //     }
-
-    //     return errors;
-    // }
 }
