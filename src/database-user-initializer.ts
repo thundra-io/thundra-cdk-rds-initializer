@@ -1,11 +1,12 @@
-import * as cdk from "@aws-cdk/core";
-import * as cr from "@aws-cdk/custom-resources";
-import * as iam from "@aws-cdk/aws-iam";
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as log from "@aws-cdk/aws-logs";
-import * as secretsmanager from '@aws-cdk/aws-secretsmanager'
-import * as path from "path";
-import {DatabaseEngine, DatabaseInitializerProps, DatabaseUserGrant} from "./database-initializer-props";
+import * as cdk from 'aws-cdk-lib';
+import * as cr from 'aws-cdk-lib/custom-resources';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as log from 'aws-cdk-lib/aws-logs';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
+import * as path from 'path';
+import { DatabaseEngine, DatabaseInitializerProps, DatabaseUserGrant } from './database-initializer-props';
+import { Construct } from 'constructs';
 
 /**
  * Properties to create a database user with IAM support on AWS RDS
@@ -64,7 +65,7 @@ export class DatabaseUserInitializer extends cdk.Resource {
         secret?: secretsmanager.ISecret;
     }[]
 
-    public constructor(scope: cdk.Construct, id: string, props: DatabaseUserInitializerProps) {
+    public constructor(scope: Construct, id: string, props: DatabaseUserInitializerProps) {
         super(scope, id);
         this.prefix = props.prefix || '';
         this.postfix = props.postfix || '';
@@ -137,19 +138,5 @@ export class DatabaseUserInitializer extends cdk.Resource {
                 DatabaseEngine: this.databaseEngine
             },
         });
-    }
-
-    protected validate(): string[] {
-        const errors: string[] = [];
-
-        if (this.databaseUsers == null || this.databaseUsers.length === 0) {
-            errors.push('Database users properties must not be empty.');
-        }
-
-        if (this.databaseEngine == null || DatabaseEngine.MySQL !== this.databaseEngine) {
-            errors.push('Only MySQL database engine is supported now.');
-        }
-
-        return errors;
     }
 }

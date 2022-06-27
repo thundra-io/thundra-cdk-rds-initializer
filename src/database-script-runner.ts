@@ -1,11 +1,12 @@
-import * as cdk from "@aws-cdk/core";
-import * as cr from "@aws-cdk/custom-resources";
-import * as iam from "@aws-cdk/aws-iam";
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as log from "@aws-cdk/aws-logs";
-import * as secretsmanager from '@aws-cdk/aws-secretsmanager'
-import * as path from "path";
-import {DatabaseEngine, DatabaseInitializerProps} from "./database-initializer-props";
+import * as cdk from 'aws-cdk-lib';
+import * as cr from 'aws-cdk-lib/custom-resources';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as log from 'aws-cdk-lib/aws-logs';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
+import * as path from 'path';
+import { DatabaseEngine, DatabaseInitializerProps } from './database-initializer-props';
+import { Construct } from 'constructs';
 
 /**
  * Properties to run a database script on AWS RDS
@@ -35,7 +36,7 @@ export class DatabaseScriptRunner extends cdk.Resource {
     private readonly script: string;
     private readonly databaseEngine: DatabaseEngine;
 
-    public constructor(scope: cdk.Construct, id: string, props: DatabaseScriptRunnerProps) {
+    public constructor(scope: Construct, id: string, props: DatabaseScriptRunnerProps) {
         super(scope, id);
         this.prefix = props.prefix || '';
         this.postfix = props.postfix || '';
@@ -82,19 +83,5 @@ export class DatabaseScriptRunner extends cdk.Resource {
                 DatabaseEngine: this.databaseEngine
             },
         });
-    }
-
-    protected validate(): string[] {
-        const errors: string[] = [];
-
-        if (this.script == null || this.script.trim().length === 0) {
-            errors.push('Script properties must not be empty.');
-        }
-
-        if (this.databaseEngine == null || DatabaseEngine.MySQL !== this.databaseEngine) {
-            errors.push('Only MySQL database engine is supported now.');
-        }
-
-        return errors;
     }
 }

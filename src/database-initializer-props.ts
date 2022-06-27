@@ -1,5 +1,5 @@
-import * as ec2 from '@aws-cdk/aws-ec2'
-import * as secretsmanager from '@aws-cdk/aws-secretsmanager'
+import * as ec2 from 'aws-cdk-lib/aws-ec2'
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 
 /**
  * Base properties for database initializer resources.
