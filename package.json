@@ -14,11 +14,11 @@
     "release": "release-it ${VERSION_SCALE} --ci --git.commit --git.push --git.tag --git.tagName='v${version}' --github.release --no-git.requireCleanWorkingDir --no-git.requireUpstream --npm.publish --npm.skipChecks"
   },
   "peerDependencies": {
-    "aws-cdk": "2.27.0",
+    "aws-cdk": "^2.77.0",
     "constructs": "^10.0.0"
   },
   "devDependencies": {
-    "aws-cdk-lib": "2.27.0",
+    "aws-cdk-lib": "2.77.0",
     "constructs": "^10.0.0",
     "@types/jest": "^27.4.1",
     "@types/node": "^16.11.6",
