@@ -1,6 +1,6 @@
 {
   "name": "@thundra/cdk-rds-initializer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "AWS CDK custom resource to initialize AWS RDS database",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
