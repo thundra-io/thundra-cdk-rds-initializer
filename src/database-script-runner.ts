@@ -51,7 +51,7 @@ export class DatabaseScriptRunner extends cdk.Resource {
             functionName: `${this.prefix}database-script-runner${this.postfix}`,
             code: lambda.Code.fromAsset(path.join(__dirname, "lambda")),
             handler: "index.databaseScriptRunnerHandler",
-            runtime: lambda.Runtime.NODEJS_14_X,
+            runtime: lambda.Runtime.NODEJS_20_X,
             memorySize: 512,
             timeout: cdk.Duration.minutes(1),
             logRetention: log.RetentionDays.ONE_DAY,
