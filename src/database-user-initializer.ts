@@ -87,7 +87,7 @@ export class DatabaseUserInitializer extends cdk.Resource {
             functionName: `${this.prefix}database-user-initializer${this.postfix}`,
             code: lambda.Code.fromAsset(path.join(__dirname, "lambda")),
             handler: "index.databaseUserInitializerHandler",
-            runtime: lambda.Runtime.NODEJS_14_X,
+            runtime: lambda.Runtime.NODEJS_20_X,
             memorySize: 512,
             timeout: cdk.Duration.minutes(1),
             logRetention: log.RetentionDays.ONE_DAY,
